@@ -6,11 +6,11 @@ container:
   replicaCount: 3
 
   image:
-    repository: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/staging/api
+    repository: 869690475570.dkr.ecr.eu-west-1.amazonaws.com/staging/api
     tag: latest
     pullPolicy: Always
   
-  port: 8080
+  port: 3000
 
   resources:
     limits:
@@ -34,15 +34,13 @@ service:
 ingress:
   enabled: true
   annotations: {}
-  host: <DNS_ROOT_NAME>
+  host: api.app-staging.env.remilab.forge-demo.fr
   paths: /
 
 configmap: []
 
 secret:
-  enabled: false
+  enabled: true
   external:
-    - name: staging/api
-      keys: DATABASE_USER
-    - name: staging/api
-      keys: DATABASE_PASSWORD
+    - name: env-app-staging-pgsql-db
+      keys: password
