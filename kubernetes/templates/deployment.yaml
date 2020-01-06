@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}
+  labels:
+{{ include "chart.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.container.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "chart.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "chart.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.container.image.repository }}:{{ .Values.container.image.tag }}"
+          imagePullPolicy: {{ .Values.container.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ .Chart.Name }}
+              optional: true
+          - secretRef:
+              name: {{ .Chart.Name }}
+              optional: true
+          ports:
+            - name: http
+              containerPort: {{ .Values.container.port }}
+              protocol: TCP
+          resources:
+            limits:
+              memory: {{ .Values.container.resources.limits.memory }}
+              cpu: {{ .Values.container.resources.limits.cpu }}
+            requests:
+              memory: {{ .Values.container.resources.requests.memory }}
+              cpu: {{ .Values.container.resources.requests.cpu }}
+          {{- if .Values.container.probe.enabled -}}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.container.probe.path }}
+              port: {{ .Values.container.port }}
+            timeoutSeconds: {{ .Values.container.probe.livenessTimeOut }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.container.probe.path }}
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: {{ .Values.container.probe.readinessDelay }}
+          {{- end }}

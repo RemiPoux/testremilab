@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  database:
+    image: postgres:9.6
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_HOST=database
+      - POSTGRES_DB=<CUSTOM_DB>
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src:/usr/src/app/src
+    entrypoint: npm run start:dev
+    environment:
+      - NODE_ENV=dev
+      - PORT=3000
+      - DATABASE_HOST=database
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=<CUSTOM_DB>
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password
